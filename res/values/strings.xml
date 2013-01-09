@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">smplWeather</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="refresh">Refresh</string>
+    
+    <color name="background">#333333</color>
+    <color name="foreground_forecast">#c0c0c0</color>
+    <color name="foreground_current">#FFFFFF</color>
+    
+    <string name="descImage">A small icon representing the current weather.</string>
+    
+    <string name="settings">Settings</string>
+
+</resources>
