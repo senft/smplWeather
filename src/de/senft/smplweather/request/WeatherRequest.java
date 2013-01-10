@@ -6,14 +6,14 @@ public abstract class WeatherRequest {
 
     public double getLatitude() {
         // TODO
-        return 37.77500916;
-        // return latitude;
+        // return 37.77500916;
+        return latitude;
     }
 
     public double getLongitude() {
         // TODO
-        return -122.41825867;
-        // return longtitude;
+        // return -122.41825867;
+        return longitude;
     }
 
     public WeatherRequest(double lat, double lng) {

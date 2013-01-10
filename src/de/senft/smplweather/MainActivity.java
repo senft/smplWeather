@@ -6,17 +6,19 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +28,7 @@ import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.senft.smplweather.request.CachedRequest;
 import de.senft.smplweather.request.WeatherRequest;
 import de.senft.smplweather.request.WeatherRequestCallback;
 import de.senft.smplweather.request.WundergroundReqest;
@@ -34,11 +37,21 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "smplWeather";
 
+    // The time a request is up-to-date (in ms)
+    private final int TIMEOUT_REQUEST = 3600000;
+
+    private SharedPreferences pref;
+
+    private CachedRequest lastRequest;
+
     private TextView txtCity;
     private TextView txtCurrent;
     private TextView txtFore1;
     private TextView txtFore2;
     private TextView txtFore3;
+    private TextView txtFore1Date;
+    private TextView txtFore2Date;
+    private TextView txtFore3Date;
     private ProgressBar progressBar;
 
     private Typeface tfSimplicity;
@@ -51,6 +64,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        pref.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(
+                    SharedPreferences sharedPreferences, String key) {
+                Log.i(TAG, "Changed: " + key);
+            }
+        });
+
+        lastRequest = new CachedRequest(this);
 
         initUI();
 
@@ -72,11 +97,13 @@ public class MainActivity extends Activity {
         // Handle item selection
         switch (item.getItemId()) {
         case R.id.menu_refresh:
-            refresh();
+            refresh(true);
             return true;
         case R.id.menu_settings:
-            Toast.makeText(MainActivity.this, "Settings", Toast.LENGTH_LONG)
-                    .show();
+            // Toast.makeText(MainActivity.this, "Settings", Toast.LENGTH_LONG)
+            // .show();
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -102,6 +129,10 @@ public class MainActivity extends Activity {
         txtFore2 = (TextView) findViewById(R.id.txtFore2);
         txtFore3 = (TextView) findViewById(R.id.txtFore3);
 
+        txtFore1Date = (TextView) findViewById(R.id.txtFore1Date);
+        txtFore2Date = (TextView) findViewById(R.id.txtFore2Date);
+        txtFore3Date = (TextView) findViewById(R.id.txtFore3Date);
+
         progressBar = (ProgressBar) findViewById(R.id.progressBar1);
 
         txtCity.setTypeface(tfSimplicity);
@@ -109,6 +140,9 @@ public class MainActivity extends Activity {
         txtFore1.setTypeface(tfSimplicity);
         txtFore2.setTypeface(tfSimplicity);
         txtFore3.setTypeface(tfSimplicity);
+        txtFore1Date.setTypeface(tfSimplicity);
+        txtFore2Date.setTypeface(tfSimplicity);
+        txtFore3Date.setTypeface(tfSimplicity);
 
         txtFore1.setOnClickListener(new OnClickListener() {
             @Override
@@ -136,18 +170,57 @@ public class MainActivity extends Activity {
     }
 
     private void refresh() {
-        // TODO check if locations changed -> city name
+        refresh(false);
+    }
+
+    private void refresh(boolean forceUpdate) {
+        Location currentLocation = locationManager
+                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        final String currentCityName = getCityName(currentLocation);
+
+        if (!forceUpdate
+                && currentCityName.equals(lastRequest.getCityName())
+                && lastRequest.getTime() + TIMEOUT_REQUEST > System
+                        .currentTimeMillis()) {
+            // Data should still be up-to-date
+            Log.i(TAG, "Getting data from storage.");
+
+            txtCity.setText("" + lastRequest.getCityName());
+            txtCurrent.setText("" + lastRequest.getCurrentTemp());
+            txtFore1.setText(lastRequest.getMinTempFore(1) + " / "
+                    + lastRequest.getMaxTempFore(1));
+            txtFore2.setText(lastRequest.getMinTempFore(2) + " / "
+                    + lastRequest.getMaxTempFore(2));
+            txtFore3.setText(lastRequest.getMinTempFore(3) + " / "
+                    + lastRequest.getMaxTempFore(3));
+
+            txtFore1Date.setText(lastRequest.getDateFore(1));
+            txtFore2Date.setText(lastRequest.getDateFore(2));
+            txtFore3Date.setText(lastRequest.getDateFore(3));
+
+            txtCity.setVisibility(View.VISIBLE);
+            txtCurrent.setVisibility(View.VISIBLE);
+            txtFore1.setVisibility(View.VISIBLE);
+            txtFore2.setVisibility(View.VISIBLE);
+            txtFore3.setVisibility(View.VISIBLE);
+            txtFore1Date.setVisibility(View.VISIBLE);
+            txtFore2Date.setVisibility(View.VISIBLE);
+            txtFore3Date.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+
         txtCurrent.setVisibility(View.GONE);
         txtFore1.setVisibility(View.INVISIBLE);
         txtFore2.setVisibility(View.INVISIBLE);
         txtFore3.setVisibility(View.INVISIBLE);
+        txtFore1Date.setVisibility(View.INVISIBLE);
+        txtFore2Date.setVisibility(View.INVISIBLE);
+        txtFore3Date.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
 
-        Location currentLocation = locationManager
-                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-        String cityName = getCityName(currentLocation);
-        txtCity.setText(cityName);
+        txtCity.setText(currentCityName);
         txtCity.setVisibility(View.VISIBLE);
 
         WeatherRequest request = new WundergroundReqest(this,
@@ -165,6 +238,10 @@ public class MainActivity extends Activity {
                         currentCondition.getIcon(), 0, 0);
                 progressBar.setVisibility(View.GONE);
                 txtCurrent.setVisibility(View.VISIBLE);
+
+                lastRequest.setCurrentTemp(currentCondition.getCelcius());
+                lastRequest.setTime(System.currentTimeMillis());
+                lastRequest.setCityName(currentCityName);
             }
 
             @Override
@@ -187,25 +264,52 @@ public class MainActivity extends Activity {
                 conditions[2] = cond[1];
                 conditions[3] = cond[2];
 
-                txtFore1.setText("" + cond[0].getCelcius());
-                txtFore2.setText("" + cond[1].getCelcius());
-                txtFore3.setText("" + cond[2].getCelcius());
+                txtFore1.setText(cond[0].getMinC() + " / " + cond[0].getMaxC());
+                txtFore2.setText(cond[1].getMinC() + " / " + cond[1].getMaxC());
+                txtFore3.setText(cond[2].getMinC() + " / " + cond[2].getMaxC());
+
+                txtFore1Date.setText(cond[0].getDate());
+                txtFore2Date.setText(cond[1].getDate());
+                txtFore3Date.setText(cond[2].getDate());
 
                 Bitmap mIcon = BitmapFactory.decodeResource(getResources(),
                         conditions[1].getIcon());
-                BitmapDrawable ic = new BitmapDrawable(Bitmap
-                        .createScaledBitmap(mIcon, 24, 24, true));
+                BitmapDrawable ic1 = new BitmapDrawable(Bitmap
+                        .createScaledBitmap(mIcon, 160, 160, true));
 
-                txtFore1.setCompoundDrawablesWithIntrinsicBounds(null, ic,
+                mIcon = BitmapFactory.decodeResource(getResources(),
+                        conditions[1].getIcon());
+                BitmapDrawable ic2 = new BitmapDrawable(Bitmap
+                        .createScaledBitmap(mIcon, 160, 160, true));
+
+                mIcon = BitmapFactory.decodeResource(getResources(),
+                        conditions[1].getIcon());
+                BitmapDrawable ic3 = new BitmapDrawable(Bitmap
+                        .createScaledBitmap(mIcon, 160, 160, true));
+
+                txtFore1.setCompoundDrawablesWithIntrinsicBounds(null, ic1,
                         null, null);
-                // txtFore2.setCompoundDrawablesWithIntrinsicBounds(0,
-                // conditions[2].getIcon(), 0, 0);
-                // txtFore3.setCompoundDrawablesWithIntrinsicBounds(0,
-                // conditions[3].getIcon(), 0, 0);
+                txtFore2.setCompoundDrawablesWithIntrinsicBounds(null, ic2,
+                        null, null);
+                txtFore3.setCompoundDrawablesWithIntrinsicBounds(null, ic3,
+                        null, null);
 
                 txtFore1.setVisibility(View.VISIBLE);
                 txtFore2.setVisibility(View.VISIBLE);
                 txtFore3.setVisibility(View.VISIBLE);
+                txtFore1Date.setVisibility(View.VISIBLE);
+                txtFore2Date.setVisibility(View.VISIBLE);
+                txtFore3Date.setVisibility(View.VISIBLE);
+
+                lastRequest.setDateFore(1, cond[0].getDate());
+                lastRequest.setDateFore(2, cond[1].getDate());
+                lastRequest.setDateFore(3, cond[2].getDate());
+                lastRequest.setMinTempFore(1, cond[0].getMinC());
+                lastRequest.setMinTempFore(2, cond[1].getMinC());
+                lastRequest.setMinTempFore(3, cond[2].getMinC());
+                lastRequest.setMaxTempFore(1, cond[0].getMaxC());
+                lastRequest.setMaxTempFore(2, cond[1].getMaxC());
+                lastRequest.setMaxTempFore(3, cond[2].getMaxC());
             }
 
             @Override
@@ -216,6 +320,9 @@ public class MainActivity extends Activity {
                 txtFore1.setVisibility(View.INVISIBLE);
                 txtFore2.setVisibility(View.INVISIBLE);
                 txtFore3.setVisibility(View.INVISIBLE);
+                txtFore1Date.setVisibility(View.INVISIBLE);
+                txtFore2Date.setVisibility(View.INVISIBLE);
+                txtFore3Date.setVisibility(View.INVISIBLE);
 
                 Log.e(TAG, "Failed to retreive forecast.");
             }
@@ -235,8 +342,7 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.e(TAG, "Failed to map GPD coordinates to a city name.");
+        Log.e(TAG, "Failed to map GPS coordinates to a city name.");
         return "Unknown";
     }
-
 }

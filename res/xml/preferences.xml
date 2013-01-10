@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Appearance" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_fullscreen"
+            android:title="Fullscreen" />
+
+        <de.senft.smplweather.preferences.FixedColorPicker
+            android:defaultValue="333333"
+            android:key="pref_background"
+            android:title="Background" />
+
+        <!-- <ListPreference -->
+        <!-- android:dependency="pref_sync" -->
+        <!-- android:summary="sum_hallo" -->
+        <!-- android:key="pref_syncConnectionType" -->
+        <!-- android:title="title" -->
+        <!-- android:dialogTitle="diatotle" -->
+        <!-- android:defaultValue="meh" /> -->
+    </PreferenceCategory>
+
+</PreferenceScreen>

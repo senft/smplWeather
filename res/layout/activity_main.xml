@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/dark_grey"
     tools:context=".MainActivity" >
 
     <LinearLayout
@@ -48,7 +48,6 @@
                 android:indeterminate="true"
                 android:padding="20dp"
                 android:visibility="visible" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -57,40 +56,88 @@
             android:gravity="center"
             android:padding="10dp" >
 
-            <TextView
-                android:id="@+id/txtFore1"
+            <LinearLayout
+                android:id="@+id/linefore1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
-                android:drawableTop="@drawable/ic_launcher"
-                android:gravity="center"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/foreground_forecast"
-                android:textSize="@dimen/fontSizeForecast"
-                android:visibility="invisible" />
+                android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/txtFore2"
+                <TextView
+                    android:id="@+id/txtFore1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableTop="@drawable/ic_launcher"
+                    android:gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/foreground_forecast"
+                    android:textSize="@dimen/fontSizeForecast"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:id="@+id/txtFore1Date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/foreground_forecast"
+                    android:textSize="@dimen/fontSizeDate" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linfore2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
-                android:drawableTop="@drawable/ic_launcher"
-                android:gravity="center"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/foreground_forecast"
-                android:textSize="@dimen/fontSizeForecast"
-                android:visibility="invisible" />
+                android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/txtFore3"
+                <TextView
+                    android:id="@+id/txtFore2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableTop="@drawable/ic_launcher"
+                    android:gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/foreground_forecast"
+                    android:textSize="@dimen/fontSizeForecast"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:id="@+id/txtFore2Date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/foreground_forecast"
+                    android:textSize="@dimen/fontSizeDate" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linfore3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@drawable/ic_launcher"
-                android:gravity="center"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/foreground_forecast"
-                android:textSize="@dimen/fontSizeForecast"
-                android:visibility="invisible" />
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/txtFore3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableTop="@drawable/ic_launcher"
+                    android:gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/foreground_forecast"
+                    android:textSize="@dimen/fontSizeForecast"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:id="@+id/txtFore3Date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/foreground_forecast"
+                    android:textSize="@dimen/fontSizeDate" />
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

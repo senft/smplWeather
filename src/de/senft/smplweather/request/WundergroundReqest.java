@@ -42,10 +42,10 @@ public class WundergroundReqest extends WeatherRequest {
                         ObservationResponse current = response
                                 .getCurrentObservation();
                         String icon = current.getIcon();
-                        double temperature = current.getTempF();
+                        int temperature = (int) Math.round(current.getTempF());
 
                         Condition currentCondition = new Condition("",
-                                temperature, iconStringToR(icon));
+                                temperature, 0, 0, iconStringToR(icon), "Now");
 
                         callback.onSuccess(new Condition[] { currentCondition });
                     }
@@ -89,11 +89,18 @@ public class WundergroundReqest extends WeatherRequest {
                         for (int i = 0; i < 3; i++) {
                             ForecastDayResponse current = days.get(i);
                             String text = current.getConditions();
-                            double temperature = current.getHigh()
-                                    .getFahrenheit();
+                            String weekday = current.getDate().getWeekday();
+
+                            int max = (int) Math.round(current.getHigh()
+                                    .getFahrenheit());
+
+                            int min = (int) Math.round(current.getLow()
+                                    .getFahrenheit());
+
                             String icon = current.getIcon();
-                            forecast[i] = new Condition(text, temperature,
-                                    iconStringToR(icon));
+
+                            forecast[i] = new Condition(text, 0, min, max,
+                                    iconStringToR(icon), weekday);
                         }
 
                         callback.onSuccess(forecast);
